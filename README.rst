@@ -46,10 +46,10 @@ Usage
 
    If you want to use the CAPTCHA service by Deathbycaptcha, please do the following:
 
-     - Download `Death By Captcha API`__, then unzip and put it into the root directory
-      of the project. (This folder has existed in repository)
+   - Download `Death By Captcha API`__, then unzip and put it into the root directory
+    of the project. (This folder has existed in repository)
 
-    __ https://static.deathbycaptcha.com/files/dbc_api_v4_6_3_python3.zip
+   __ https://static.deathbycaptcha.com/files/dbc_api_v4_6_3_python3.zip
 
 #. Create your username and password on webpage of CAPTCHA solving services,
    and modify them(including image size restriction) in script file ``verify.py``::
