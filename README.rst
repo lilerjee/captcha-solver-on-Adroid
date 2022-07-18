@@ -47,7 +47,7 @@ Usage
    If you want to use the CAPTCHA service by Deathbycaptcha, please do the following:
 
    - Download `Death By Captcha API`__, then unzip and put it into the root directory
-    of the project. (This folder has existed in repository)
+     of the project. (This folder has existed in repository)
 
    __ https://static.deathbycaptcha.com/files/dbc_api_v4_6_3_python3.zip
 
