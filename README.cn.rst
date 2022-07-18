@@ -60,7 +60,7 @@ CAPTCHA人机识别系统服务提供者一般提供了用户友好的基于浏�
           DBC_PASSWORD = '<your dbc password>'
 
 #. 创建或者选择CAPTCHA的 ``resolver`` (CAPTCHA解析服务提供者的API)
-   (在脚本里面已经存在了两个resolver: ``DeathByCaptchaUI``, and ``TwoCaptchaAPI``)::
+   (在脚本里面已经存在了两个resolver: ``DeathByCaptchaUI``, ``TwoCaptchaAPI``)::
 
     class CaptchaAndroidBaseUI:
         def __init__(self, driver, resolver=None, wait_timeout=wait_timeout):
