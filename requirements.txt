@@ -1,0 +1,5 @@
+Pillow
+2captcha-python
+selenium
+Appium-Python-Client
+2captcha-python

@@ -1,0 +1,507 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>DeathByCaptcha API Clients</title></head>
+<body>
+<h1>DeathByCaptcha API Clients</h1>
+
+<h2>Introduction</h2>
+<p>DeathByCaptcha offers APIs of two types &mdash; HTTP and socket-based,
+with the latter being recommended for having faster responses and overall
+better performance.  Switching between different APIs is usually as easy as
+changing the client class and/or package name, the interface stays the same.</p>
+<p>When using the socket API, please make sure that outgoing TCP traffic to
+<em>api.dbcapi.me</em> to the ports range <em>8123&ndash;8130</em>
+is not blocked on your side.</p>
+
+<h2>How to Use DBC API Clients</h2>
+
+<h3>Thread-safety notes</h3>
+<p><em>.NET</em>, <em>Java</em> and <em>Python</em> clients are thread-safe,
+means it is perfectly fine to share a client between multiple threads (although
+in a heavily multithreaded applications it is a better idea to keep a pool of
+clients).</p>
+<p><em>PHP</em> itself is not multithreaded so the clients are not thread-safe.</p>
+<p><em>Perl</em> clients are not thread-safe at this moment, use a client instance
+per thread.</p>
+
+<h3>Common Clients' Interface</h3>
+<p>All the clients have to be instantiated with two string arguments: your
+DeathByCaptcha account's <em>username</em> and <em>password</em>.</p>
+<p>All the clients provide a few methods to handle your CAPTCHAs and your
+DBC account.  Below you will find those methods' short summary summary and
+signatures in pseudo-code.  Check the example scripts and the clients' source
+code for more details.</p>
+
+<h4>Upload()</h4>
+<p>Uploads a CAPTCHA to the DBC service for solving, returns uploaded CAPTCHA details on success, <code>NULL</code> otherwise.  Here are the signatures in pseudo-code:</p>
+<dl>
+    <dt>.NET</dt>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.Upload(byte[] imageData)</code></dd>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.Upload(Stream imageStream)</code></dd>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.Upload(string imageFileName)</code></dd>
+    <dt>Java</dt>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.upload(byte[] imageData)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.upload(InputStream imageStream)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.upload(File imageFile)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.upload(String imageFileName)</code></dd>
+    <dt>Perl</dt>
+    <dd><code>hash DeathByCaptcha.Client-&gt;upload(string $imageFileName)</code></dd>
+    <dt>PHP</dt>
+    <dd><code>array DeathByCaptcha_Client-&gt;upload(resource $imageFile)</code></dd>
+    <dd><code>array DeathByCaptcha_Client-&gt;upload(string $imageFileName)</code></dd>
+    <dt>Python</dt>
+    <dd><code>dict deathbycaptcha.Client.upload(file imageFile)</code></dd>
+    <dd><code>dict deathbycaptcha.Client.upload(str imageFileName)</code></dd>
+</dl>
+
+<h4>GetCaptcha()</h4>
+<p>Fetches uploaded CAPTCHA details, returns <code>NULL</code> on failures.</p>
+<dl>
+    <dt>.NET</dt>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.GetCaptcha(int captchaId)</code></dd>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.GetCaptcha(DeathByCaptcha.Captcha captcha)</code></dd>
+    <dt>Java</dt>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.getCaptcha(int captchaId)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.getCaptcha(com.DeathByCaptcha.Captcha captcha)</code></dd>
+    <dt>Perl</dt>
+    <dd><code>hash DeathByCaptcha.Client-&gt;getCaptcha(int $captchaId)</code></dd>
+    <dt>PHP</dt>
+    <dd><code>array DeathByCaptcha_Client-&gt;get_captcha(int $captchaId)</code></dd>
+    <dt>Python</dt>
+    <dd><code>dict deathbycaptcha.Client.get_captcha(dict imageFileName)</code></dd>
+</dl>
+
+<h4>Report()</h4>
+<p>Reports incorrectly solved CAPTCHA for refund, returns <code>true</code> on success, <code>false</code> otherwise.</p>
+<p>Please make sure the CAPTCHA you're reporting was in fact incorrectly solved, do not just report them thoughtlessly, or else you'll be flagged as abuser and banned.</p>
+<dl>
+    <dt>.NET</dt>
+    <dd><code>bool DeathByCaptcha.Client.Report(int captchaId)</code></dd>
+    <dd><code>bool DeathByCaptcha.Client.Report(DeathByCaptcha.Captcha captcha)</code></dd>
+    <dt>Java</dt>
+    <dd><code>boolean com.DeathByCaptcha.Client.report(int captchaId)</code></dd>
+    <dd><code>boolean com.DeathByCaptcha.Client.report(com.DeathByCaptcha.Captcha captcha)</code></dd>
+    <dt>Perl</dt>
+    <dd><code>bool DeathByCaptcha.Client-&gt;report(int $captchaId)</code></dd>
+    <dt>PHP</dt>
+    <dd><code>bool DeathByCaptcha.Client-&gt;report(int $captchaId)</code></dd>
+    <dt>Python</dt>
+    <dd><code>bool deathbycaptcha.Client.report(int captchaId)</code></dd>
+</dl>
+
+<h4>Decode()</h4>
+<p>This method uploads a CAPTCHA, then polls for its status until it's solved or times out; returns solved CAPTCHA details on success, <code>NULL</code> otherwise.</p>
+<dl>
+    <dt>.NET</dt>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.Decode(byte[] imageData, int timeout)</code></dd>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.Decode(Stream imageStream, int timeout)</code></dd>
+    <dd><code>DeathByCaptcha.Captcha DeathByCaptcha.Client.Decode(string imageFileName, int timeout)</code></dd>
+    <dt>Java</dt>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.decode(byte[] imageData, int timeout)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.decode(InputStream imageStream, int timeout)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.decode(File imageFile, int timeout)</code></dd>
+    <dd><code>com.DeathByCaptcha.Captcha com.DeathByCaptcha.Client.decode(string imageFileName, int timeout)</code></dd>
+    <dt>Perl</dt>
+    <dd><code>hash DeathByCaptcha.Client-&gt;decode(string $imageFileName, int $timeout)</code></dd>
+    <dt>PHP</dt>
+    <dd><code>array DeathByCaptcha.Client-&gt;decode(resource $imageFile, int $timeout)</code></dd>
+    <dd><code>array DeathByCaptcha.Client-&gt;decode(string $imageFileName, int $timeout)</code></dd>
+    <dt>Python</dt>
+    <dd><code>dict deathbycaptcha.Client.decode(file imageFile, int timeout)</code></dd>
+    <dd><code>dict deathbycaptcha.Client.decode(str imageFileName, int timeout)</code></dd>
+</dl>
+
+<h4>GetBalance()</h4>
+<p>Fetches your current DBC credit balance (in&nbsp;US cents).</p>
+<dl>
+    <dt>.NET</dt>
+    <dd><code>double DeathByCaptcha.Client.GetBalance()</code></dd>
+    <dt>Java</dt>
+    <dd><code>double com.DeathByCaptcha.Client.getBalance()</code></dd>
+    <dt>Perl</dt>
+    <dd><code>float DeathByCaptcha.Client-&gt;getBalance()</code></dd>
+    <dt>PHP</dt>
+    <dd><code>float DeathByCaptcha.Client-&gt;get_balance()</code></dd>
+    <dt>Python</dt>
+    <dd><code>float deathbycaptcha.Client.get_balance()</code></dd>
+</dl>
+
+<h3>CAPTCHA objects/details hashes</h3>
+<p><em>.NET</em> and <em>Java</em> clients wrap CAPTCHA details in <code>DeathByCaptcha.Captcha</code> and <code>com.DeathByCaptcha.Captcha</code> objects respectively, exposing CAPTCHA details through the following properties and methods:</p>
+<ul>
+    <li>CAPTCHA numeric ID as integer <code>Id</code> (.NET) and <code>id</code> (Java) properties;</li>
+    <li>CAPTCHA text as string <code>Text</code> (.NET) and <code>text</code> (Java) properties;</li>
+    <li>a flag showing whether the CAPTCHA was uploaded, as boolean <code>Uploaded</code> property (.NET) and <code>isUploaded()</code> (Java) method;</li>
+    <li>a flag showing whether the CAPTCHA was solved, as boolean <code>Solved</code> property (.NET) and <code>isSolved()</code> (Java) method;</li>
+    <li>a flag showing whether the CAPTCHA was solved correctly, as boolean <code>Correct</code> property (.NET) and <code>isCorrect()</code> (Java) method.</li>
+</ul>
+<p>Clients in other languages use simple hashes (dictionaries, associative arrays etc.) to store CAPTCHA details, keeping numeric IDs under <code>"captcha"</code> key, CAPTCHA text under <code>"text"</code> key, and the correctness flag under <code>"is_correct"</code> key.</p>
+
+
+<h3>Examples</h3>
+<p>Below you can find a few DBC API clients' usage examples.</p>
+
+<h4>C#</h4>
+<code><pre>
+    using DeathByCaptcha;
+
+    /* Put your DeathByCaptcha account username and password here.
+       Use HttpClient for HTTP API. */
+    Client client = (Client)new SocketClient(username, password);
+    try {
+        double balance = client.GetBalance();
+
+        /* Put your CAPTCHA file name, or file object, or arbitrary stream,
+           or an array of bytes, and optional solving timeout (in seconds) here: */
+        Captcha captcha = client.Decode(captchaFileName, timeout);
+        if (null != captcha) {
+            /* The CAPTCHA was solved; captcha.Id property holds its numeric ID,
+               and captcha.Text holds its text. */
+            Console.WriteLine("CAPTCHA {0} solved: {1}", captcha.Id, captcha.Text);
+
+            if (/* check if the CAPTCHA was incorrectly solved */) {
+                client.Report(captcha);
+            }
+        }
+    } catch (AccessDeniedException e) {
+        /* Access to DBC API denied, check your credentials and/or balance */
+    }
+</pre></code>
+
+<h4>Java</h4>
+<code><pre>
+    import com.DeathByCaptcha.AccessDeniedException;
+    import com.DeathByCaptcha.Captcha;
+    import com.DeathByCaptcha.Client;
+    import com.DeathByCaptcha.SocketClient;
+    import com.DeathByCaptcha.HttpClient;
+
+    /* Put your DeathByCaptcha account username and password here.
+       Use HttpClient for HTTP API. */
+    Client client = (Client)new SocketClient(username, password);
+    try {
+        double balance = client.getBalance();
+
+        /* Put your CAPTCHA file name, or file object, or arbitrary input stream,
+           or an array of bytes, and optional solving timeout (in seconds) here: */
+        Captcha captcha = client.decode(captchaFileName, timeout);
+        if (null != captcha) {
+            /* The CAPTCHA was solved; captcha.id property holds its numeric ID,
+               and captcha.text holds its text. */
+            System.out.println("CAPTCHA " + captcha.id + " solved: " + captcha.text);
+
+            if (/* check if the CAPTCHA was incorrectly solved */) {
+                client.report(captcha);
+            }
+        }
+    } catch (AccessDeniedException e) {
+        /* Access to DBC API denied, check your credentials and/or balance */
+    }
+</pre></code>
+
+<h4>PHP</h4>
+<code><pre>
+    require_once "deathbycaptcha.php";
+
+    /* Put your DBC account username and password here.
+       Use DeathByCaptcha_HttpClient for HTTP API. */
+    $client = new DeathByCaptcha_SocketClient($username, $password);
+    try {
+        $balance = $client-&gt;get_balance();
+
+        /* Put your CAPTCHA file name or opened file handler, and optional
+           solving timeout (in seconds) here: */
+        $captcha = $client-&gt;decode($captcha_file_name, $timeout);
+        if ($captcha) {
+            /* The CAPTCHA was solved; captcha["captcha"] item holds its
+               numeric ID, and captcha["text"] item its text. */
+            echo "CAPTCHA {$captcha["captcha"]} solved: {$captcha["text"]}";
+
+            if (/* check if the CAPTCHA was incorrectly solved */) {
+                $client-&gt;report($captcha["captcha"]);
+            }
+        }
+    } catch (DeathByCaptcha_AccessDeniedException) {
+        /* Access to DBC API denied, check your credentials and/or balance */
+    }
+</pre></code>
+
+<h4>Python</h4>
+<code><pre>
+    import deathbycaptcha
+
+    # Put your DBC account username and password here.
+    # Use deathbycaptcha.HttpClient for HTTP API.
+    client = deathbycaptcha.SocketClient(username, password)
+    try:
+        balance = client.get_balance()
+
+        # Put your CAPTCHA file name or file-like object, and optional
+        # solving timeout (in seconds) here:
+        captcha = client.decode(captcha_file_name, timeout)
+        if captcha:
+            # The CAPTCHA was solved; captcha["captcha"] item holds its
+            # numeric ID, and captcha["text"] item its text.
+            print "CAPTCHA %s solved: %s" % (captcha["captcha"], captcha["text"])
+
+            if ...:  # check if the CAPTCHA was incorrectly solved
+                client.report(captcha["captcha"])
+    except deathbycaptcha.AccessDeniedException:
+        # Access to DBC API denied, check your credentials and/or balance
+</pre></code>
+
+<div class="content">
+  <h1>New Recaptcha API support</h1>
+  <h2>What's "new reCAPTCHA/noCAPTCHA"?</h2> 
+  <p>They're new reCAPTCHA challenges that typically require the user to identify and click on certain images. They're not to be confused with traditional word/number reCAPTCHAs (those have no images).</p> 
+
+  <p>For your convinience, we implemented support for New Recaptcha API.  If your software works with it, and supports minimal configuration, you should be able to decode captchas using New Recaptcha API in no time.</p>
+  <p>We provide two different types of New Recaptcha API:</p>
+  <ul>
+    <li><b>Coordinates API</b>: Provided a screenshot, the API returns a group of coordinates to click.</li>
+    <li><b>Image Group API</b>: Provided a group of (base64-encoded) images, the API returns the indexes of the images to click.</li>
+  </ul>
+
+    <h2>Coordinates API FAQ:</h2>
+    <dl class="faq">
+      <dt>What's the <b>Coordinates API URL</b>?</dt>
+        <dd>
+        <p>To use the <b>Coordinates API</b> you will have to send a HTTP POST Request to http://api.dbcapi.me/api/captcha</p>
+        </dd>
+    </dl>
+
+    <dl class="faq">
+      <dt>What are the POST parameters for the <b>Coordinates API</b>?</dt>
+        <dd>
+          <p>
+          <ul>
+            <li><b>username</b>: Your DBC account username</li>
+            <li><b>password</b>: Your DBC account password</li>
+            <li><b>captchafile</b>: a Base64 encoded or Multipart file contents with a valid New Recaptcha screenshot</li>
+            <li><b>type=2</b>: Type 2 specifies this is a New Recaptcha <b>Coordinates API</b></li>
+          </ul>
+          </p>
+        </dd>
+
+      <dt>What's the response from the <b>Coordinates API</b>?</dt>
+        <dd>
+          <p><b>captcha</b>: id of the provided captcha, if the <b>text</b> field is null, you will have to pool the url http://api.dbcapi.me/api/captcha/<b>captcha_id</b> until it becomes available </p>
+          <p><b>is_correct</b>:(0 or 1) specifying if the captcha was marked as incorrect or unreadable</p>
+          <p><b>text</b>: a json-like nested list, with all the coordinates (x, y) to click relative to the image, for example:
+          <pre>
+              [[23.21, 82.11]]
+          </pre>
+            where the X coordinate is 23.21 and the Y coordinate is 82.11
+          </p>
+          <p><b></b></p>
+        </dd>
+    </dl>
+
+    <h2>Image Group API FAQ:</h2>
+    <dl class="faq">
+      <dt>What's the <b>Image Group API URL</b>?</dt>
+        <dd>
+        <p>To use the <b>Image Group API</b> you will have to send a HTTP POST Request to http://api.dbcapi.me/api/captcha</p>
+        </dd>
+    </dl>
+
+    <dl class="faq">
+      <dt>What are the POST parameters for the <b>Image Group API</b>?</dt>
+        <dd>
+          <p>
+          <ul>
+            <li><b>username</b>: Your DBC account username</li>
+            <li><b>password</b>: Your DBC account password</li>
+            <li><b>captchafile</b>: the Base64 encoded file contents with a valid New Recaptcha screenshot.
+              You must send each image in a single "captchafile" parameter. The order you send them matters</li>
+            <li><b>banner</b>: the Base64 encoded banner image (the example image that appears on the upper right)</li>
+            <li><b>banner_text</b>: the banner text (the text that appears on the upper left)</li>
+            <li><b>type=3</b>: Type 3 specifies this is a New Recaptcha <b>Image Group API</b></li>
+            <li><b>grid</b>: Optional grid parameter specifies what grid individual images in captcha are aligned to (string, width+"x"+height, Ex.: "2x4", if images aligned to 4 rows with 2 images in each. If not supplied, dbc will attempt to autodetect the grid.</li>
+          </ul>
+          </p>
+        </dd>
+
+      <dt>What's the response from the <b>Image Group API</b>?</dt>
+        <dd>
+          <p><b>captcha</b>: id of the provided captcha, if the <b>text</b> field is null, you will have to pool the url http://api.dbcapi.me/api/captcha/<b>captcha_id</b> until it becomes available </p>
+          <p><b>is_correct</b>:(0 or 1) specifying if the captcha was marked as incorrect or unreadable</p>
+          <p><b>text</b>: a json-like list of the index for each image that should be clicked. for example:
+          <pre>
+              [1, 4, 6]
+          </pre>
+            where the images that should be clicked are the first, the fourth and the six, counting from left to right and up to bottom
+          </p>
+          <p><b>Examples</b>
+              <h4>Python and Recaptcha Coordinates API</h4>
+              <code><pre>
+                  import deathbycaptcha
+
+                  # Put your DBC account username and password here.
+                  username = "user"  
+                  password = "password"
+                  captcha_file = 'test.jpg' # image
+
+                  client = deathbycaptcha.SocketClient(username, password) 
+                  # to use http client use: client = deathbycaptcha.HttpClient(username, password)
+
+
+                  try:
+                      balance = client.get_balance()
+
+                      # Put your CAPTCHA file name or file-like object, and optional
+                      # solving timeout (in seconds) here:
+                      captcha = client.decode(captcha_file, type=2)
+                      if captcha:
+                          # The CAPTCHA was solved; captcha["captcha"] item holds its
+                          # numeric ID, and captcha["text"] item its list of "coordinates".
+                          print "CAPTCHA %s solved: %s" % (captcha["captcha"], captcha["text"])
+
+                          if '':  # check if the CAPTCHA was incorrectly solved
+                              client.report(captcha["captcha"])
+                  except deathbycaptcha.AccessDeniedException:
+                      # Access to DBC API denied, check your credentials and/or balance
+                      print "error: Access to DBC API denied, check your credentials and/or balance"
+              </pre></code>
+              <h4>Python and Recaptcha Image Group</h4>
+              <code><pre>
+                  import deathbycaptcha
+
+                  # Put your DBC account username and password here.
+                  username = "user"  
+                  password = "password"
+                  captcha_file = "test2.jpg"  # image
+                  banner = "banner.jpg"  # image banner
+                  banner_text = "select all pizza:"
+
+                  #client = deathbycaptcha.SocketClient(username, password) 
+                  client = deathbycaptcha.HttpClient(username, password)
+                  # to use http client use: client = deathbycaptcha.HttpClient(username, password)
+
+
+                  try:
+                      balance = client.get_balance()
+
+                      # Put your CAPTCHA file name or file-like object, and optional
+                      # solving timeout (in seconds) here:
+                      captcha = client.decode(
+                          captcha_file, type=3, banner=banner, banner_text=banner_text)
+                      #you can supply optional `grid` argument to decode() call, with a 
+                      #string like 3x3 or 2x4, defining what grid individual images were located at
+                      #example: 
+                      #captcha = client.decode(
+                      #    captcha_file, type=3, banner=banner, banner_text=banner_text, grid="2x4")
+                      #see 2x4.png example image to have an idea what that images look like
+                      #If you wont supply `grid` argument, dbc will attempt to autodetect the grid
+                      if captcha:
+                          # The CAPTCHA was solved; captcha["captcha"] item holds its
+                          # numeric ID, and captcha["text"] is a json-like list of the index for each image that should be clicked.
+                          print "CAPTCHA %s solved: %s" % (captcha["captcha"], captcha["text"])
+
+                          if '':  # check if the CAPTCHA was incorrectly solved
+                              client.report(captcha["captcha"])
+                  except deathbycaptcha.AccessDeniedException:
+                      # Access to DBC API denied, check your credentials and/or balance
+                      print "error: Access to DBC API denied, check your credentials and/or balance"
+              </pre></code>
+
+
+
+              <h4>PHP and Recaptcha Coordinates API</h4>
+              <code><pre>
+                  /**
+                   * Death by Captcha PHP API recaptcha coordinates usage example
+                   *
+                   * @package DBCAPI
+                   * @subpackage PHP
+                   */
+
+                  /**
+                   * DBC API clients
+                   */
+                  require_once 'deathbycaptcha.php';
+
+                  // Put your DBC username & password here.
+                  $username = "username";
+                  $password = "password";
+                  $captcha_filename = "test.jpg";  # your captchafile
+                  $extra = ['type'=>2];   # extra parameters in an array
+                  // Use DeathByCaptcha_HttpClient() class if you want to use HTTP API.
+                  $client = new DeathByCaptcha_SocketClient($username, $password);
+                  $client->is_verbose = true;
+
+                  echo "Your balance is {$client->balance} US cents\n";
+
+                  // Put your CAPTCHA image file name, file resource, or vector of bytes,
+                  // and optional solving timeout (in seconds) here; you'll get CAPTCHA
+                  // details array on success.
+                  if ($captcha = $client->decode($captcha_filename, $extra)) {
+                      echo "CAPTCHA {$captcha['captcha']} uploaded\n";
+
+                      sleep(DeathByCaptcha_Client::DEFAULT_TIMEOUT);
+
+                          // Poll for CAPTCHA coordinates:
+                          if ($text = $client->get_text($captcha['captcha'])) {
+                              echo "CAPTCHA {$captcha['captcha']} solved: {$text}\n";
+
+                              // Report an incorrectly solved CAPTCHA.
+                              // Make sure the CAPTCHA was in fact incorrectly solved!
+                              //$client->report($captcha['captcha']);
+                          }
+                      }
+              </pre></code>
+              <h4>PHP and Recaptcha Image Group</h4>
+              <code><pre>
+                  /**
+                   * Death by Captcha PHP API recaptcha coordinates usage example
+                   *
+                   * @package DBCAPI
+                   * @subpackage PHP
+                   */
+
+                  /**
+                   * DBC API clients
+                   */
+                  require_once 'deathbycaptcha.php';
+
+                  // Put your DBC username & password here.
+                  $username = "username";
+                  $password = "password";
+                  $captcha_filename = "test2.jpg";   # your captchafile
+                  // extra parameters in an array
+                  $extra = [
+                      'type'=>3,
+                      'banner'=> 'banner.jpg',  # banner img
+                      'banner_text'=> "select all pizza:"  # banner text 
+                       #'grid' => "3x2" #optional paramater for specifying what grid 
+                                        #images are aligned to. 
+                                        #If ommitted, dbc would try to autodetect the grid.
+                  ];
+                  // Use DeathByCaptcha_HttpClient() class if you want to use HTTP API.
+                  $client = new DeathByCaptcha_SocketClient($username, $password);
+                  $client->is_verbose = true;
+
+                  echo "Your balance is {$client->balance} US cents\n";
+
+                  if ($captcha = $client->decode($captcha_filename, $extra)) {
+                      echo "CAPTCHA {$captcha['captcha']} uploaded\n";
+
+                      sleep(DeathByCaptcha_Client::DEFAULT_TIMEOUT);
+
+                          // Poll for CAPTCHA indexes:
+                          if ($text = $client->get_text($captcha['captcha'])) {
+                              echo "CAPTCHA {$captcha['captcha']} solved: {$text}\n";
+
+                              // Report an incorrectly solved CAPTCHA.
+                              // Make sure the CAPTCHA was in fact incorrectly solved!
+                              //$client->report($captcha['captcha']);
+                          }
+                      }
+              </pre></code>
+          </p>
+        </dd>
+    </dl>
+</div>
+
+</body>
+</html>
